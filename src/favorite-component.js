@@ -1,9 +1,17 @@
 import { auth, usersFavoriteColorSchemesRef } from './firebase.js';
 
-export function createSchemeLi() {
+export function createSchemeLi(schemeName) {
     const html = /*html*/ `
         <li class="scheme-display">
-            <div><span class="favorite-heart">♡</span></div>
+            <div id="upper-bar">
+                <span class="favorite-heart">♡</span>
+                <span id="scheme-name">${schemeName}</span>
+                <form>
+                    Rename: <input type="text" name="new-name">
+                    <button>Save</button>
+                </form>
+            </div>
+            <div id="scheme-colors"></div>
         </li>
     `;
     const template = document.createElement('template');
@@ -33,49 +41,58 @@ const favoritesContainer = document.getElementById('favorites-container');
 
 export default function loadFavoriteSchemes(schemes, favoriteSchemeIds) {
     schemes.forEach((scheme, index) => {
-        const favoriteDom = createSchemeLi(scheme);
-        const li = favoriteDom.querySelector('li');
+        const favoriteDom = createSchemeLi(favoriteSchemeIds[index]);
+        const schemeColors = favoriteDom.getElementById('scheme-colors');
         scheme.scheme.forEach(color => {
             const colorDom = createColorSection(color);
-            li.appendChild(colorDom);
+            schemeColors.appendChild(colorDom);
         });
+        const schemeNameForm = favoriteDom.querySelector('form');
         const favoriteHeart = favoriteDom.querySelector('.favorite-heart');
         const userId = auth.currentUser.uid;
         const usersFavoritesRef = usersFavoriteColorSchemesRef.child(userId);
         const favoriteId = favoriteSchemeIds[index];
-        const userFavoriteSchemeRef = usersFavoritesRef.child(favoriteId);
-        userFavoriteSchemeRef.once('value')
-            .then(snapshot => {
-                const value = snapshot.val();
-                let isFavorite = false;
-                if(value) {
-                    addFavorite();
-                } else {
+        let userFavoriteSchemeRef = usersFavoritesRef.child(favoriteId);
+        schemeNameForm.addEventListener('submit', event => {
+            event.preventDefault();
+            const schemeNameFormData = new FormData(schemeNameForm);
+            const newName = schemeNameFormData.get('new-name');
+            console.log(newName);
+            userFavoriteSchemeRef = newName;
+            // might have to set a new ref in firebase where we save custom names
+            // delete the unique id and load up both refs
+        });
+        userFavoriteSchemeRef.on('value', snapshot => {
+            const value = snapshot.val();
+            let isFavorite = false;
+            if(value) {
+                addFavorite();
+            } else {
+                removeFavorite();
+            }
+            function addFavorite() {
+                isFavorite = true;
+                favoriteHeart.textContent = '♥';
+                favoriteHeart.classList.add('favorite');
+            }
+            function removeFavorite() {
+                isFavorite = false;
+                favoriteHeart.textContent = '♡';
+                favoriteHeart.classList.remove('favorite');
+            }
+            favoriteHeart.addEventListener('click', () => {
+                if(isFavorite) {
+                    userFavoriteSchemeRef.remove();
                     removeFavorite();
+                } else {
+                    userFavoriteSchemeRef.set({
+                        seedColor: scheme.seedColor,
+                        scheme: scheme.scheme
+                    });
+                    addFavorite();
                 }
-                function addFavorite() {
-                    isFavorite = true;
-                    favoriteHeart.textContent = '♥';
-                    favoriteHeart.classList.add('favorite');
-                }
-                function removeFavorite() {
-                    isFavorite = false;
-                    favoriteHeart.textContent = '♡';
-                    favoriteHeart.classList.remove('favorite');
-                }
-                favoriteHeart.addEventListener('click', () => {
-                    if(isFavorite) {
-                        userFavoriteSchemeRef.remove();
-                        removeFavorite();
-                    } else {
-                        userFavoriteSchemeRef.set({
-                            seedColor: scheme.seedColor,
-                            scheme: scheme.scheme
-                        });
-                        addFavorite();
-                    }
-                });
             });
+        });
         favoritesContainer.appendChild(favoriteDom);
     });
 }

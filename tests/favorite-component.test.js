@@ -7,11 +7,20 @@ test('create dom for faves', assert => {
     // arrange
     const expected = /*html*/ `
         <li class="scheme-display">
-            <div><span class="favorite-heart">♡</span></div>
+            <div id="upper-bar">
+                <span class="favorite-heart">♡</span>
+                <span id="scheme-name">20acddanalogic5</span>
+                <form>
+                    Rename: <input type="text" name="new-name">
+                    <button>Save</button>
+                </form>
+            </div>
+            <div id="scheme-colors"></div>
         </li>
     `;
+    const schemeName = '20acddanalogic5';
     // act
-    const result = createSchemeLi();
+    const result = createSchemeLi(schemeName);
 
     // assert
     assert.htmlEqual(result, expected);

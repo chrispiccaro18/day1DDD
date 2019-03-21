@@ -14,11 +14,15 @@ ul {
 
 .scheme-display {
     display: flex;
-    flex-direction: row wrap;
+    flex-direction: column;
     border: solid 2px white;
     width: 90%;
     padding: 50px;
     /* margin: 10%; */
+}
+
+#scheme-colors {
+    display: flex;
 }
 
 .color-display {
