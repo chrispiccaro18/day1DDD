@@ -41,7 +41,8 @@ const favoritesContainer = document.getElementById('favorites-container');
 
 export default function loadFavoriteSchemes(schemes, favoriteSchemeIds) {
     schemes.forEach((scheme, index) => {
-        const favoriteDom = createSchemeLi(favoriteSchemeIds[index]);
+        let schemeName = scheme.customName || favoriteSchemeIds[index];
+        const favoriteDom = createSchemeLi(schemeName);
         const schemeColors = favoriteDom.getElementById('scheme-colors');
         scheme.scheme.forEach(color => {
             const colorDom = createColorSection(color);
@@ -52,15 +53,14 @@ export default function loadFavoriteSchemes(schemes, favoriteSchemeIds) {
         const userId = auth.currentUser.uid;
         const usersFavoritesRef = usersFavoriteColorSchemesRef.child(userId);
         const favoriteId = favoriteSchemeIds[index];
-        let userFavoriteSchemeRef = usersFavoritesRef.child(favoriteId);
+        const userFavoriteSchemeRef = usersFavoritesRef.child(favoriteId);
         schemeNameForm.addEventListener('submit', event => {
             event.preventDefault();
             const schemeNameFormData = new FormData(schemeNameForm);
             const newName = schemeNameFormData.get('new-name');
-            console.log(newName);
-            userFavoriteSchemeRef = newName;
-            // might have to set a new ref in firebase where we save custom names
-            // delete the unique id and load up both refs
+            userFavoriteSchemeRef.update({
+                customName: newName
+            });
         });
         userFavoriteSchemeRef.on('value', snapshot => {
             const value = snapshot.val();

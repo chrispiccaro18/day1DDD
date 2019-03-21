@@ -21,7 +21,8 @@ const paletteContainer = document.getElementById('palette-container');
 
 export function loadSchemesList(schemesIds, favoriteSchemes, updateColor) {
     schemesIds.forEach((schemeId, index) => {
-        const schemeDom = createSchemeLi(schemeId);
+        const schemeName = favoriteSchemes[index].customName || schemeId;
+        const schemeDom = createSchemeLi(schemeName);
         const li = schemeDom.querySelector('li');
         li.addEventListener('click', () => {
             clearPalette();
