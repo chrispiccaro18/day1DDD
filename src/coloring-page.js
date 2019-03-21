@@ -17,17 +17,10 @@ auth.onAuthStateChanged(user => {
             const data = snapshot.val();
             const favoriteSchemesIds = Object.keys(data);
             const favoriteSchemes = convertObjectToArray(data);
-            loadSchemesList(favoriteSchemesIds, favoriteSchemes);
+            loadSchemesList(favoriteSchemesIds, favoriteSchemes, updateColor => {
+                coloringColor = updateColor;
+            });
         });
-});
-
-const colors = document.querySelectorAll('.palette-color');
-console.log(colors);
-colors.forEach(color => {
-    color.addEventListener('click', () => {
-        console.log(color.style.backgroundColor);
-        coloringColor = color.style.backgroundColor;
-    });
 });
 
 const template = document.createElement('template');

@@ -19,20 +19,27 @@ export function createSchemeLi(scheme) {
 const schemesList = document.getElementById('schemes-list');
 const paletteContainer = document.getElementById('palette-container');
 
-export function loadSchemesList(schemesIds, favoriteSchemes) {
+export function loadSchemesList(schemesIds, favoriteSchemes, updateColor) {
     schemesIds.forEach((schemeId, index) => {
         const schemeDom = createSchemeLi(schemeId);
         const li = schemeDom.querySelector('li');
         li.addEventListener('click', () => {
+            clearPalette();
             favoriteSchemes[index].scheme.forEach(color => {
                 const colorDom = createColorDiv(color);
                 const colorDiv = colorDom.querySelector('div');
                 colorDiv.addEventListener('click', () => {
-                    console.log(colorDiv.style);
+                    updateColor(colorDiv.style.backgroundColor);
                 });
                 paletteContainer.appendChild(colorDom);
             });
         });
         schemesList.appendChild(schemeDom);
     });
+}
+
+function clearPalette() {
+    while(paletteContainer.children.length > 0) {
+        paletteContainer.lastElementChild.remove();
+    }
 }
